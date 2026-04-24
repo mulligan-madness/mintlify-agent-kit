@@ -1,0 +1,158 @@
+#!/bin/zsh
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
+CODEX_DEST_ROOT="${CODEX_HOME_DIR}/skills"
+CURSOR_PLUGIN_ROOT="${CURSOR_PLUGIN_HOME:-$HOME/.cursor/plugins/local}"
+CURSOR_DEST_ROOT="${CURSOR_PLUGIN_ROOT}/mintlify-agent-kit"
+MIN_NODE_VERSION="20.17.0"
+
+print_usage() {
+  cat <<'EOF'
+Usage:
+  ./install.sh codex
+  ./install.sh cursor
+  ./install.sh both
+
+This helper installs the Mintlify Agent Kit adapters and the repo-local
+official Mintlify CLI dependency (`mint`).
+EOF
+}
+
+print_node_help() {
+  cat <<EOF
+Node.js ${MIN_NODE_VERSION}+ is required by the official Mintlify CLI.
+
+Install or switch Node, then verify with:
+
+  node --version
+EOF
+}
+
+require_node() {
+  if ! command -v node >/dev/null 2>&1; then
+    print_node_help
+    exit 1
+  fi
+
+  node -e '
+    const min = process.argv[1].split(".").map(Number);
+    const actual = process.versions.node.split(".").map(Number);
+    for (let i = 0; i < Math.max(actual.length, min.length); i += 1) {
+      const left = actual[i] || 0;
+      const right = min[i] || 0;
+      if (left > right) process.exit(0);
+      if (left < right) process.exit(1);
+    }
+  ' "$MIN_NODE_VERSION" || {
+    print_node_help
+    exit 1
+  }
+}
+
+require_npm() {
+  if ! command -v npm >/dev/null 2>&1; then
+    cat <<'EOF'
+npm is required to install the repo-local official Mintlify CLI dependency.
+
+Install npm with Node.js, then verify with:
+
+  npm --version
+EOF
+    exit 1
+  fi
+}
+
+install_dependencies() {
+  local install_root="$1"
+
+  if [[ -f "$install_root/package-lock.json" ]]; then
+    if ! npm --prefix "$install_root" ci; then
+      npm --prefix "$install_root" install
+    fi
+  else
+    npm --prefix "$install_root" install
+  fi
+}
+
+verify_mint() {
+  local install_root="$1"
+
+  DO_NOT_TRACK=1 MINTLIFY_TELEMETRY_DISABLED=1 npm --prefix "$install_root" exec -- mint --version >/dev/null
+}
+
+install_codex() {
+  mkdir -p "$CODEX_DEST_ROOT"
+
+  for skill_dir in "$REPO_ROOT"/skills/*; do
+    if [[ ! -d "$skill_dir" ]]; then
+      continue
+    fi
+
+    skill_name="$(basename "$skill_dir")"
+    dest_dir="$CODEX_DEST_ROOT/$skill_name"
+    rm -rf "$dest_dir"
+    cp -R "$skill_dir" "$dest_dir"
+    echo "Installed Codex skill $skill_name -> $dest_dir"
+  done
+}
+
+install_cursor() {
+  mkdir -p "$CURSOR_PLUGIN_ROOT"
+  rm -rf "$CURSOR_DEST_ROOT"
+  mkdir -p "$CURSOR_DEST_ROOT"
+
+  cp -R "$REPO_ROOT/.cursor-plugin" "$CURSOR_DEST_ROOT/.cursor-plugin"
+  cp -R "$REPO_ROOT/skills" "$CURSOR_DEST_ROOT/skills"
+  cp -R "$REPO_ROOT/scripts" "$CURSOR_DEST_ROOT/scripts"
+  cp "$REPO_ROOT/package.json" "$CURSOR_DEST_ROOT/package.json"
+  if [[ -f "$REPO_ROOT/package-lock.json" ]]; then
+    cp "$REPO_ROOT/package-lock.json" "$CURSOR_DEST_ROOT/package-lock.json"
+  fi
+  if [[ -d "$REPO_ROOT/commands" ]]; then
+    cp -R "$REPO_ROOT/commands" "$CURSOR_DEST_ROOT/commands"
+  fi
+
+  install_dependencies "$CURSOR_DEST_ROOT"
+  verify_mint "$CURSOR_DEST_ROOT"
+
+  echo "Installed Cursor plugin -> $CURSOR_DEST_ROOT"
+}
+
+main() {
+  local target="${1:-}"
+
+  case "$target" in
+    codex|cursor|both) ;;
+    *)
+      print_usage
+      exit 1
+      ;;
+  esac
+
+  require_node
+  require_npm
+  install_dependencies "$REPO_ROOT"
+  verify_mint "$REPO_ROOT"
+
+  case "$target" in
+    codex)
+      install_codex
+      ;;
+    cursor)
+      install_cursor
+      ;;
+    both)
+      install_codex
+      install_cursor
+      ;;
+  esac
+
+  echo
+  echo "Mintlify Agent Kit install complete."
+  echo "Codex restart: start a new session."
+  echo "Cursor restart: restart Cursor."
+}
+
+main "$@"
