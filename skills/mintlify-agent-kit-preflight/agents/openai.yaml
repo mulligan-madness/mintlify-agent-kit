@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Preflight"
+  short_description: "Check Mintlify CLI and kit installation"
+  default_prompt: "Use $mintlify-agent-kit-preflight to check the Mintlify Agent Kit installation."

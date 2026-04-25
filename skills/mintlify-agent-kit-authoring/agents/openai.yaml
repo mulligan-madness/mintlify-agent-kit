@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Authoring"
+  short_description: "Write and improve Mintlify MDX docs"
+  default_prompt: "Use $mintlify-agent-kit-authoring to improve this Mintlify MDX documentation."

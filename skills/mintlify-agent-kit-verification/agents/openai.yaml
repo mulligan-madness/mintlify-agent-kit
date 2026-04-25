@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Verification"
+  short_description: "Verify Mintlify docs and served AI surfaces"
+  default_prompt: "Use $mintlify-agent-kit-verification to verify these Mintlify documentation changes."

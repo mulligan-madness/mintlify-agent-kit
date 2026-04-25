@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Configuration"
+  short_description: "Edit docs.json and Mintlify site structure"
+  default_prompt: "Use $mintlify-agent-kit-configuration to update this Mintlify docs configuration."

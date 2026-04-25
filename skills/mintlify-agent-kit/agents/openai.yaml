@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Agent Kit"
+  short_description: "Route Mintlify docs work to the right skill"
+  default_prompt: "Use $mintlify-agent-kit to route this Mintlify docs task to the right workflow."
