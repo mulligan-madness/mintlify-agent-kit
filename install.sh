@@ -7,6 +7,7 @@ CODEX_DEST_ROOT="${CODEX_HOME_DIR}/skills"
 CURSOR_PLUGIN_ROOT="${CURSOR_PLUGIN_HOME:-$HOME/.cursor/plugins/local}"
 CURSOR_DEST_ROOT="${CURSOR_PLUGIN_ROOT}/mintlify-agent-kit"
 MIN_NODE_VERSION="20.17.0"
+DEFAULT_KIT_HOME="${MINTLIFY_AGENT_KIT_HOME:-$HOME/.mintlify-agent-kit}"
 
 print_usage() {
   cat <<'EOF'
@@ -82,6 +83,58 @@ verify_mint() {
   DO_NOT_TRACK=1 MINTLIFY_TELEMETRY_DISABLED=1 npm --prefix "$install_root" exec -- mint --version >/dev/null
 }
 
+ensure_default_kit_home() {
+  if [[ -n "${MINTLIFY_AGENT_KIT_HOME:-}" ]]; then
+    echo "Using MINTLIFY_AGENT_KIT_HOME=$MINTLIFY_AGENT_KIT_HOME"
+    return
+  fi
+
+  if [[ -L "$DEFAULT_KIT_HOME" ]]; then
+    local resolved
+    if resolved="$(cd "$DEFAULT_KIT_HOME" 2>/dev/null && pwd -P)"; then
+      if [[ "$resolved" == "$REPO_ROOT" ]]; then
+        echo "Default kit home already points to $REPO_ROOT"
+      else
+        cat <<EOF
+Warning: $DEFAULT_KIT_HOME already points to $resolved.
+Set this in Codex sessions that use this install:
+
+  export MINTLIFY_AGENT_KIT_HOME="$REPO_ROOT"
+EOF
+      fi
+    else
+      cat <<EOF
+Warning: $DEFAULT_KIT_HOME is a symlink that could not be resolved.
+Set this in Codex sessions that use this install:
+
+  export MINTLIFY_AGENT_KIT_HOME="$REPO_ROOT"
+EOF
+    fi
+    return
+  fi
+
+  if [[ -e "$DEFAULT_KIT_HOME" ]]; then
+    if [[ -d "$DEFAULT_KIT_HOME" ]]; then
+      local existing
+      existing="$(cd "$DEFAULT_KIT_HOME" && pwd -P)"
+      if [[ "$existing" == "$REPO_ROOT" ]]; then
+        echo "Default kit home already resolves to $REPO_ROOT"
+        return
+      fi
+    fi
+    cat <<EOF
+Warning: $DEFAULT_KIT_HOME already exists and was not changed.
+Set this in Codex sessions that use this install:
+
+  export MINTLIFY_AGENT_KIT_HOME="$REPO_ROOT"
+EOF
+    return
+  fi
+
+  ln -s "$REPO_ROOT" "$DEFAULT_KIT_HOME"
+  echo "Linked default kit home $DEFAULT_KIT_HOME -> $REPO_ROOT"
+}
+
 install_codex() {
   mkdir -p "$CODEX_DEST_ROOT"
 
@@ -139,12 +192,14 @@ main() {
   case "$target" in
     codex)
       install_codex
+      ensure_default_kit_home
       ;;
     cursor)
       install_cursor
       ;;
     both)
       install_codex
+      ensure_default_kit_home
       install_cursor
       ;;
   esac

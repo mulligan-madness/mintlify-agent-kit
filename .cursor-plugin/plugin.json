@@ -12,9 +12,17 @@
   "keywords": [
     "mintlify",
     "mint",
+    "docs",
+    "mdx",
+    "docs.json",
+    "openapi",
+    "asyncapi",
+    "verification",
+    "preflight",
+    "llms.txt",
+    "markdown",
     "agent",
-    "skills",
-    "workflow"
+    "skills"
   ],
   "skills": "./skills/"
 }

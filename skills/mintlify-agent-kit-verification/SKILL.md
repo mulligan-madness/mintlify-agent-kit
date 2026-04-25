@@ -1,6 +1,6 @@
 ---
 name: mintlify-agent-kit-verification
-description: Use when verifying Mintlify documentation changes in a known docs root, preview deployments, published docs URLs, AI-facing Markdown surfaces, or official `mint` check results.
+description: Use when verifying Mintlify docs changes with mint validate, mint broken-links, mint a11y, mint dev, mint score, published docs URLs, /llms.txt, .md pages, Accept header Markdown checks, or AI-facing served surfaces.
 ---
 
 # Mintlify Agent Kit Verification

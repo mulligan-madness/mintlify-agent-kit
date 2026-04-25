@@ -1,6 +1,6 @@
 ---
 name: mintlify-agent-kit-preflight
-description: Use when official Mintlify tooling availability is missing or uncertain, including Mintlify Agent Kit install checks, repo-local `mint` resolution, docs-root detection, telemetry posture, auth/status preflight, and Codex or Cursor adapter installation troubleshooting.
+description: Use when official Mintlify tooling availability is missing or uncertain, including Mintlify Agent Kit install checks, doctor, repo-local `mint` resolution, docs-root detection, telemetry posture, auth/status preflight, and Codex or Cursor adapter troubleshooting.
 ---
 
 # Mintlify Agent Kit Preflight

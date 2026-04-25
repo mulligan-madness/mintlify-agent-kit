@@ -1,6 +1,6 @@
 ---
 name: mintlify-agent-kit-authoring
-description: Use when editing Mintlify .mdx docs content for authoring quality, content type decisions, page structure, examples, component choice, API-adjacent explanations, style and tone, Markdown export, or AI-legibility decisions.
+description: Use when editing Mintlify .mdx docs content, frontmatter, titles, descriptions, headings, links, examples, component choice, API-adjacent explanations, style and tone, Markdown export, or AI-legibility decisions.
 ---
 
 # Mintlify Agent Kit Authoring
