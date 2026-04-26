@@ -12,7 +12,20 @@ import {
   isNodeSupported,
   resolveTelemetry,
 } from "../scripts/doctor.mjs";
-import { patchMintlifyPreviewingTarImport } from "../scripts/patch-mintlify-previewing-tar.mjs";
+import {
+  patchJsYamlCompatibilityAliases,
+  patchMintlifyPreviewingTarImport,
+} from "../scripts/patch-mintlify-previewing-tar.mjs";
+
+const JS_YAML_UNPATCHED_ALIASES = `// Removed functions from JS-YAML 3.0.x
+module.exports.safeLoad            = renamed('safeLoad', 'load');
+module.exports.safeLoadAll         = renamed('safeLoadAll', 'loadAll');
+module.exports.safeDump            = renamed('safeDump', 'dump');`;
+
+const JS_YAML_PATCHED_ALIASES = `// Removed functions from JS-YAML 3.0.x
+module.exports.safeLoad            = module.exports.load;
+module.exports.safeLoadAll         = module.exports.loadAll;
+module.exports.safeDump            = module.exports.dump;`;
 
 test("compareVersions orders semantic version components numerically", () => {
   assert.equal(compareVersions("20.17.0", "20.17.0"), 0);
@@ -93,6 +106,69 @@ test("patchMintlifyPreviewingTarImport rewrites the incompatible tar default imp
     assert.deepEqual(patchMintlifyPreviewingTarImport(target), {
       changed: false,
       reason: "already-patched",
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("patchJsYamlCompatibilityAliases rewrites removed compatibility aliases", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "mintlify-agent-kit-js-yaml-patch-"));
+  try {
+    const target = path.join(root, "index.js");
+    await writeFile(target, `'use strict';\n\n${JS_YAML_UNPATCHED_ALIASES}\n`);
+
+    assert.deepEqual(patchJsYamlCompatibilityAliases(target), {
+      changed: true,
+      reason: "patched",
+    });
+
+    const contents = await readFile(target, "utf8");
+    assert.equal(contents, `'use strict';\n\n${JS_YAML_PATCHED_ALIASES}\n`);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("patchJsYamlCompatibilityAliases is idempotent when aliases are already patched", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "mintlify-agent-kit-js-yaml-idempotent-"));
+  try {
+    const target = path.join(root, "index.js");
+    await writeFile(target, `'use strict';\n\n${JS_YAML_PATCHED_ALIASES}\n`);
+
+    assert.deepEqual(patchJsYamlCompatibilityAliases(target), {
+      changed: false,
+      reason: "already-patched",
+    });
+
+    const contents = await readFile(target, "utf8");
+    assert.equal(contents, `'use strict';\n\n${JS_YAML_PATCHED_ALIASES}\n`);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("patchJsYamlCompatibilityAliases reports a missing target", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "mintlify-agent-kit-js-yaml-missing-"));
+  try {
+    assert.deepEqual(patchJsYamlCompatibilityAliases(path.join(root, "missing.js")), {
+      changed: false,
+      reason: "target-missing",
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("patchJsYamlCompatibilityAliases reports an expected alias mismatch", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "mintlify-agent-kit-js-yaml-mismatch-"));
+  try {
+    const target = path.join(root, "index.js");
+    await writeFile(target, JS_YAML_UNPATCHED_ALIASES.replace("safeDump", "unsafeDump"));
+
+    assert.deepEqual(patchJsYamlCompatibilityAliases(target), {
+      changed: false,
+      reason: "expected-aliases-missing",
     });
   } finally {
     await rm(root, { recursive: true, force: true });
