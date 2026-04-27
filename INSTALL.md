@@ -20,7 +20,9 @@ Use the helper:
 ```bash
 ./install.sh codex
 ./install.sh cursor
+./install.sh factory
 ./install.sh both
+./install.sh all
 ```
 
 The helper installs package dependencies in the kit repository and stops if Node.js or npm is missing.
@@ -29,6 +31,9 @@ Install targets:
 
 - Codex: `${CODEX_HOME:-$HOME/.codex}/skills`
 - Cursor: `${CURSOR_PLUGIN_HOME:-$HOME/.cursor/plugins/local}/mintlify-agent-kit`
+- Factory/Droid: `${FACTORY_HOME:-$HOME/.factory}/skills`
+
+`both` keeps the existing Codex + Cursor behavior. Use `all` to install Codex, Cursor, and Factory/Droid together.
 
 ## 3. Configure Kit Home When Needed
 
@@ -38,7 +43,7 @@ Skills invoke `mint` with:
 npm --prefix "$MINTLIFY_AGENT_KIT_HOME" exec -- mint <command> ...
 ```
 
-Set `MINTLIFY_AGENT_KIT_HOME` to the local kit clone when skills are installed outside the repository:
+Codex and Factory/Droid installs link `$HOME/.mintlify-agent-kit` to the local kit clone when safe. Set `MINTLIFY_AGENT_KIT_HOME` yourself when skills are installed outside the repository or when the installer reports that the default kit home already points elsewhere:
 
 ```bash
 export MINTLIFY_AGENT_KIT_HOME="$HOME/.mintlify-agent-kit"
@@ -54,6 +59,7 @@ export MINTLIFY_AGENT_KIT_HOME="${CURSOR_PLUGIN_HOME:-$HOME/.cursor/plugins/loca
 
 - Codex: start a new session
 - Cursor: restart Cursor
+- Factory/Droid: restart Droid so the copied skills appear as slash commands
 
 ## For Agents
 
@@ -71,8 +77,8 @@ Required process:
    - https://raw.githubusercontent.com/mulligan-madness/mintlify-agent-kit/main/INSTALL.md
 2. Run `node --version` and confirm Node.js is 20.17.0 or newer.
 3. Run `npm --version`.
-4. Ask the user which adapter(s) to install: `codex`, `cursor`, or `both`.
-5. Clone `https://github.com/mulligan-madness/mintlify-agent-kit.git` if the repo is not already present locally, then run `./install.sh codex`, `./install.sh cursor`, or `./install.sh both` from the repo root.
+4. Ask the user which adapter(s) to install: `codex`, `cursor`, `factory`, `both`, or `all`.
+5. Clone `https://github.com/mulligan-madness/mintlify-agent-kit.git` if the repo is not already present locally, then run `./install.sh codex`, `./install.sh cursor`, `./install.sh factory`, `./install.sh both`, or `./install.sh all` from the repo root.
 6. Verify with `npm run doctor`.
 7. Verify the installed files exist in the documented target location(s).
 8. Report the exact result and any restart step required.
