@@ -24,6 +24,7 @@ If the task has more than one layer, route each layer to its owning skill. Use v
 | `.mdx` prose, page structure, frontmatter wording, headings, links inside page content, examples, component choice, API-adjacent explanations, style and tone, Markdown export, or AI legibility | `mintlify-agent-kit-authoring` |
 | `docs.json`, `$ref` config, navigation, page registration, redirects, `.mintignore`, hidden pages, OpenAPI or AsyncAPI wiring, API playground settings, or config-sensitive published behavior | `mintlify-agent-kit-configuration` |
 | `mint validate`, `mint broken-links`, `mint a11y`, `mint dev`, `mint score`, local preview, hosted docs URLs, `/llms.txt`, `/llms-full.txt`, `.md` URLs, `Accept` header Markdown checks, or final verification evidence | `mintlify-agent-kit-verification` |
+| Preview deployment API triggers, skipped automatic previews, branch preview redeploys, deployment `statusId` lookup, or project ID selection for preview deployments | `mintlify-agent-kit-deploy` |
 | Missing or uncertain repo-local `mint`, CLI version, docs root, telemetry posture, auth/status, configured subdomain, command availability, Codex install, Cursor install, or doctor output | `mintlify-agent-kit-preflight` |
 
 Use multiple child skills for mixed tasks. Examples: adding a new page usually needs authoring, configuration, then verification; changing OpenAPI navigation needs configuration, then verification; blocked `mint` availability goes to preflight before verification.
@@ -62,6 +63,8 @@ Open exact official sources when current platform mechanics matter:
 - CLI: https://www.mintlify.com/docs/cli
 - CLI install: https://www.mintlify.com/docs/cli/install
 - CLI commands: https://www.mintlify.com/docs/cli/commands
+- Preview deployment API: https://www.mintlify.com/docs/api/preview/trigger
+- Deployment status API: https://www.mintlify.com/docs/api/update/status
 - AI-native docs: https://www.mintlify.com/docs/ai-native
 - `llms.txt`: https://www.mintlify.com/docs/ai/llmstxt
 - Markdown export: https://www.mintlify.com/docs/ai/markdown-export
@@ -70,8 +73,8 @@ Child skills carry their exact source lists for authoring, configuration, verifi
 
 ## V1 Boundary
 
-The v1 kit uses official `mint` CLI commands through the repo-local kit dependency, official Mintlify docs, direct file editing, and minimal install/doctor support.
+The v1 kit uses official `mint` CLI commands through the repo-local kit dependency, official Mintlify docs, direct file editing, minimal install/doctor support, and the public Mintlify preview deployment API through `mintlify-agent-kit-deploy`.
 
-Do not create wrapper CLIs, custom analyzers, deployment commands, REST/API plumbing, analytics workflows, MCP remediation, Mintlify-agent workflows, or direct/private `@mintlify/*` package API integrations.
+Do not create wrapper CLIs, custom analyzers, production deployment commands, REST/API plumbing outside the deploy skill's preview/status endpoints, analytics workflows, MCP remediation, Mintlify-agent workflows, or direct/private `@mintlify/*` package API integrations.
 
 Do not duplicate child workflows in this root skill. Route to the child skill and keep final reports explicit about `passed`, `failed`, `blocked`, and `skipped` checks.

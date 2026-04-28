@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import {
+  buildDeployReadinessChecks,
   buildMintInvocation,
   compareVersions,
   findDocsRoot,
@@ -82,6 +83,37 @@ test("buildMintInvocation uses the repo-local official mint binary contract", ()
 
   assert.deepEqual(invocation.command, "npm");
   assert.deepEqual(invocation.args, ["--prefix", "/kit/home", "exec", "--", "mint", "validate"]);
+});
+
+test("buildDeployReadinessChecks reports optional deploy env without failing", () => {
+  assert.deepEqual(buildDeployReadinessChecks({}), [
+    {
+      label: "deploy api key",
+      ok: null,
+      detail: "optional MINTLIFY_ADMIN_API_KEY missing; required only for preview deployment API commands",
+    },
+    {
+      label: "deploy project id",
+      ok: null,
+      detail: "optional MINTLIFY_PROJECT_ID missing; pass --project-id for multi-project preview deployment work",
+    },
+  ]);
+
+  assert.deepEqual(buildDeployReadinessChecks({
+    MINTLIFY_ADMIN_API_KEY: "mint_secret",
+    MINTLIFY_PROJECT_ID: "project_123",
+  }), [
+    {
+      label: "deploy api key",
+      ok: null,
+      detail: "available from environment or kit .env",
+    },
+    {
+      label: "deploy project id",
+      ok: null,
+      detail: "available from environment or kit .env",
+    },
+  ]);
 });
 
 test("formatCheck keeps success, warning, and failure output stable", () => {

@@ -5,6 +5,7 @@ import { access } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { loadKitEnv } from "./preview-deployment.mjs";
 
 export const MIN_NODE_VERSION = "20.17.0";
 
@@ -72,6 +73,25 @@ export function buildMintInvocation(kitHome, mintArgs) {
     command: "npm",
     args: ["--prefix", kitHome, "exec", "--", "mint", ...mintArgs],
   };
+}
+
+export function buildDeployReadinessChecks(kitEnv) {
+  return [
+    {
+      label: "deploy api key",
+      ok: null,
+      detail: kitEnv.MINTLIFY_ADMIN_API_KEY
+        ? "available from environment or kit .env"
+        : "optional MINTLIFY_ADMIN_API_KEY missing; required only for preview deployment API commands",
+    },
+    {
+      label: "deploy project id",
+      ok: null,
+      detail: kitEnv.MINTLIFY_PROJECT_ID
+        ? "available from environment or kit .env"
+        : "optional MINTLIFY_PROJECT_ID missing; pass --project-id for multi-project preview deployment work",
+    },
+  ];
 }
 
 export function formatCheck(label, ok, detail) {
@@ -193,6 +213,7 @@ async function runDoctor(argv = process.argv.slice(2)) {
 
   const kitHome = resolveKitHome();
   const packageJson = readPackageJson(kitHome);
+  const kitEnv = loadKitEnv({ env: process.env, kitHome });
   const telemetry = resolveTelemetry(process.env);
   const npmVersion = commandOutput("npm", ["--version"]);
   const mintPath = resolvedMintPath(kitHome);
@@ -253,6 +274,7 @@ async function runDoctor(argv = process.argv.slice(2)) {
     ok: docsRoot ? true : null,
     detail: docsRoot || "not found from current directory; pass --docs-root <path> when needed",
   });
+  checks.push(...buildDeployReadinessChecks(kitEnv));
 
   if (options.checkStatus) {
     checks.push(runMintCheck(kitHome, ["status"], docsRoot, telemetry, "mint status"));

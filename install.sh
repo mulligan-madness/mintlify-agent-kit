@@ -187,6 +187,7 @@ install_cursor() {
   cp -R "$REPO_ROOT/skills" "$CURSOR_DEST_ROOT/skills"
   cp -R "$REPO_ROOT/scripts" "$CURSOR_DEST_ROOT/scripts"
   cp "$REPO_ROOT/package.json" "$CURSOR_DEST_ROOT/package.json"
+  cp "$REPO_ROOT/.env.example" "$CURSOR_DEST_ROOT/.env.example"
   if [[ -f "$REPO_ROOT/package-lock.json" ]]; then
     cp "$REPO_ROOT/package-lock.json" "$CURSOR_DEST_ROOT/package-lock.json"
   fi
