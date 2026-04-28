@@ -11,6 +11,8 @@
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
     "postinstall": "node scripts/patch-mintlify-previewing-tar.mjs",
+    "preview:status": "node scripts/preview-deployment.mjs status",
+    "preview:trigger": "node scripts/preview-deployment.mjs trigger",
     "test": "node --test"
   },
   "dependencies": {

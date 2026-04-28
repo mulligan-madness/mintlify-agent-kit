@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mintlify Deploy"
+  short_description: "Trigger Mintlify preview deployments"
+  default_prompt: "Use $mintlify-agent-kit-deploy to trigger or check Mintlify preview deployments."

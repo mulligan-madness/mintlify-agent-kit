@@ -55,7 +55,29 @@ Cursor plugin installs include their own package files and dependencies, so Curs
 export MINTLIFY_AGENT_KIT_HOME="${CURSOR_PLUGIN_HOME:-$HOME/.cursor/plugins/local}/mintlify-agent-kit"
 ```
 
-## 4. Restart The Agent
+## 4. Optional Preview Deployment Environment
+
+Preview deployment API support can use these optional variables:
+
+```bash
+MINTLIFY_ADMIN_API_KEY=
+MINTLIFY_PROJECT_ID=
+```
+
+For local testing, copy `.env.example` to `.env` in the kit directory and add
+real values there. For shared environments, use exported environment variables
+or CI secrets. Do not commit real API keys. Agents should not manually read or
+print `.env`; doctor and preview deployment helpers may load it only for
+readiness checks or deploy API commands.
+
+```bash
+cp .env.example .env
+```
+
+`MINTLIFY_PROJECT_ID` is the default project for preview triggers. Use
+`--project-id <projectId>` when triggering a preview for a different project.
+
+## 5. Restart The Agent
 
 - Codex: start a new session
 - Cursor: restart Cursor

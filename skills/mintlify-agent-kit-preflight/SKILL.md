@@ -9,7 +9,7 @@ description: Use when official Mintlify tooling availability is missing or uncer
 
 Use this skill only for Mintlify Agent Kit install and preflight support.
 
-Its job is to confirm local installation state, repo-local `mint` resolution, docs-root detection, telemetry posture, and optional account/project preflight.
+Its job is to confirm local installation state, repo-local `mint` resolution, docs-root detection, telemetry posture, optional account/project preflight, and optional deploy environment readiness.
 
 ## Tool Contract
 
@@ -43,8 +43,9 @@ Run that command from the target docs root when a downstream workflow invokes `m
    - `--status` for Mintlify account/auth status.
    - `--subdomain` for configured project subdomain context.
    - `--validate` to confirm a docs root can invoke local validation.
-4. If the kit is not installed, use `INSTALL.md` from the kit repository and ask which adapter target to install: `codex`, `cursor`, or `both`.
-5. Report blocked checks explicitly. Do not convert missing docs roots, missing auth, or unavailable hosted context into success.
+4. Treat deploy env warnings as non-blocking unless the current task needs that value. Preview triggers need `MINTLIFY_ADMIN_API_KEY` and a project ID; status checks need `MINTLIFY_ADMIN_API_KEY` and a `statusId`.
+5. If the kit is not installed, use `INSTALL.md` from the kit repository and ask which adapter target to install: `codex`, `cursor`, or `both`.
+6. Report blocked checks explicitly. Do not convert missing docs roots, missing auth, deploy credentials, or unavailable hosted context into success.
 
 ## Guardrails
 

@@ -52,6 +52,7 @@ test("both remains Codex and Cursor only while all includes Factory", async () =
     assertInstallSucceeded(result);
     assert.ok(await fileExists(path.join(bothFixture.codexHome, "skills", "mintlify-agent-kit", "SKILL.md")));
     assert.ok(await fileExists(path.join(bothFixture.cursorPluginHome, "mintlify-agent-kit", "package.json")));
+    assert.ok(await fileExists(path.join(bothFixture.cursorPluginHome, "mintlify-agent-kit", ".env.example")));
     assert.equal(await fileExists(path.join(bothFixture.factoryHome, "skills", "mintlify-agent-kit", "SKILL.md")), false);
   } finally {
     await rm(bothFixture.root, { recursive: true, force: true });
