@@ -46,13 +46,40 @@ Always run the checks that match the diff:
 
 Local preview is not hosted AI-surface verification. Do not use `mint dev` to prove `/llms.txt`, `/llms-full.txt`, `.md` URLs, or `Accept` header Markdown negotiation. Those checks require a served hosted URL.
 
+### Browser Preview Requests
+
+When the user asks to see local documentation changes in a browser, asks to open the docs site, or uses similar language, start `mint dev --no-open` from the docs root and leave it running for the user to test. If the user also asks for browser automation, keep the preview running until they explicitly ask to tear it down.
+
+Track only previews started in the current workspace. Create the repository `.context/` directory if needed and store preview metadata there:
+
+- `.context/mint-dev.pid` for the process ID.
+- `.context/mint-dev.url` for the actual local URL printed by `mint dev`.
+- `.context/mint-dev.root` for the docs root path.
+- `.context/mint-dev.log` for startup and runtime output.
+
+Before starting a browser preview:
+
+1. Tear down any tracked preview for the current workspace by terminating the recorded PID from `.context/mint-dev.pid`, if present.
+2. Remove `.context/mint-dev.*` after the tracked process exits or is no longer alive.
+3. Do not reuse existing browser previews. Each browser preview request gets a fresh `mint dev` process and fresh metadata.
+4. Do not use broad process cleanup such as `pkill -f "mint dev"` or killing by port. Unknown `mint dev` processes may belong to the user, another workspace, or another agent.
+
+When the user asks to tear down the browser preview, terminate only the recorded PID from `.context/mint-dev.pid`, then remove `.context/mint-dev.*`. If no tracked live PID exists, report that there is no tracked preview to stop; do not hunt for unrelated processes.
+
+After starting a browser preview:
+
+1. Wait until `mint dev` prints the local URL.
+2. Save the exact URL to `.context/mint-dev.url`; do not assume port 3000 because `mint dev` may choose the next available port.
+3. Report the URL, docs root, log path, and that the preview is still running.
+4. If startup fails, remove stale preview metadata and report the browser preview as `blocked` with concise startup output.
+
 Local preview smoke procedure:
 
 1. Start preview with `mint dev --no-open`, or `mint dev --no-open --port <port>` when the default port is unavailable or supplied.
 2. Wait until the CLI prints the local preview URL.
 3. Fetch each changed page, navigation target, generated API page, or page-level target that made preview necessary.
 4. Record HTTP status, target URL, and concise rendered-content evidence.
-5. Stop the preview process before reporting.
+5. Stop the preview process before reporting, except for browser preview requests covered above.
 6. If preview does not start, mark the preview smoke check `blocked` with the startup output.
 
 ## Hosted Verification
